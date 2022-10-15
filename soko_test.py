@@ -18,34 +18,34 @@ def verificar_estado(desc, grilla):
                 c = desc[y][x]
                 if c == '#':
                     assert soko.hay_pared(grilla, x, y)
-                    assert not soko.hay_objetivo(grilla, x, y)
-                    assert not soko.hay_jugador(grilla, x, y)
-                    assert not soko.hay_caja(grilla, x, y)
+                    assert soko.hay_objetivo(grilla, x, y) is False
+                    assert soko.hay_jugador(grilla, x, y) is False
+                    assert soko.hay_caja(grilla, x, y) is False
                 elif c == '.':
-                    assert not soko.hay_pared(grilla, x, y)
+                    assert soko.hay_pared(grilla, x, y) is False
                     assert soko.hay_objetivo(grilla, x, y)
-                    assert not soko.hay_jugador(grilla, x, y)
-                    assert not soko.hay_caja(grilla, x, y)
+                    assert soko.hay_jugador(grilla, x, y) is False
+                    assert soko.hay_caja(grilla, x, y) is False
                 elif c == '$':
-                    assert not soko.hay_pared(grilla, x, y)
-                    assert not soko.hay_objetivo(grilla, x, y)
-                    assert not soko.hay_jugador(grilla, x, y)
+                    assert soko.hay_pared(grilla, x, y) is False
+                    assert soko.hay_objetivo(grilla, x, y) is False
+                    assert soko.hay_jugador(grilla, x, y) is False
                     assert soko.hay_caja(grilla, x, y)
                 elif c == '@':
-                    assert not soko.hay_pared(grilla, x, y)
-                    assert not soko.hay_objetivo(grilla, x, y)
+                    assert soko.hay_pared(grilla, x, y) is False
+                    assert soko.hay_objetivo(grilla, x, y) is False
                     assert soko.hay_jugador(grilla, x, y)
-                    assert not soko.hay_caja(grilla, x, y)
+                    assert soko.hay_caja(grilla, x, y) is False
                 elif c == '*':
-                    assert not soko.hay_pared(grilla, x, y)
+                    assert soko.hay_pared(grilla, x, y) is False
                     assert soko.hay_objetivo(grilla, x, y)
-                    assert not soko.hay_jugador(grilla, x, y)
+                    assert soko.hay_jugador(grilla, x, y) is False
                     assert soko.hay_caja(grilla, x, y)
                 elif c == '+':
-                    assert not soko.hay_pared(grilla, x, y)
+                    assert soko.hay_pared(grilla, x, y) is False
                     assert soko.hay_objetivo(grilla, x, y)
                     assert soko.hay_jugador(grilla, x, y)
-                    assert not soko.hay_caja(grilla, x, y)
+                    assert soko.hay_caja(grilla, x, y) is False
     except AssertionError as e:
         print('Estado esperado:')
         print('\n'.join(desc))
@@ -424,7 +424,46 @@ def test17():
     grilla2 = soko.mover(grilla1, OESTE)
     verificar_estado(desc1, grilla2)
 
+def test18():
+    '''
+    Prueba: Un jugador se mueve teniendo un objetivo a distancia
+    '''
+    desc1 = [
+        '########',
+        '#@ . $ #',
+        '#      #',
+        '########',
+    ]
+    desc2 = [
+        '########',
+        '# @. $ #',
+        '#      #',
+        '########',
+    ]
+    grilla = soko.crear_grilla(desc1)
+    grilla_movida = soko.mover(grilla, ESTE)
+    verificar_estado(desc2, grilla_movida)
 
+def test19():
+    """
+    Prueba: jugador en objetivo mueve una caja
+    """
+    desc1 = [
+        "########",
+        "# +*   #",
+        "#      #",
+        "########",
+    ]
+    desc2 = [
+        "########",
+        "#  +$  #",
+        "#      #",
+        "########",
+    ]
+    grilla1 = soko.crear_grilla(desc1)
+    grilla2 = soko.mover(grilla1, ESTE)
+    verificar_estado(desc1, grilla1)
+    verificar_estado(desc2,grilla2)
 def main():
     test1()
     test2()
@@ -443,6 +482,8 @@ def main():
     test15()
     test16()
     test17()
+    test18()
+    test19()
     print("Todo OK :)")
 
 
