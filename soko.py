@@ -1,4 +1,27 @@
 def crear_grilla(desc):
+    '''Crea una grilla a partir de la descripción del estado inicial.
+
+    La descripción es una lista de cadenas, cada cadena representa una
+    fila y cada caracter una celda. Los caracteres pueden ser los siguientes:
+
+    Caracter  Contenido de la celda
+    --------  ---------------------
+           #  Pared
+           $  Caja
+           @  Jugador
+           .  Objetivo
+           *  Objetivo + Caja
+           +  Objetivo + Jugador
+
+    Ejemplo:
+
+    >>> crear_grilla([
+        '#####',
+        '#.$ #',
+        '#@  #',
+        '#####',
+    ])
+    '''
     grilla=[]
     y=len(desc)
     x=len(desc[0])
@@ -10,127 +33,145 @@ def crear_grilla(desc):
     return grilla
 
 def dimensiones(grilla):
+    '''Devuelve una tupla con la cantidad de columnas y filas de la grilla.'''
     dm=(len(grilla[0]),len(grilla))
     return dm
-    '''Devuelve una tupla con la cantidad de columnas y filas de la grilla.'''
 
 def hay_pared(grilla, c, f):
-    if '#'==grilla[f][c]:
-        return True
-    else:
-        return False
     '''Devuelve True si hay una pared en la columna y fila (c, f).'''
-
+    return "#"==grilla[f][c]
 def hay_objetivo(grilla, c, f):
-    if '.'==grilla[f][c]:
-        return True
-    elif '+'==grilla[f][c]:
-        return True
-    elif '*'==grilla[f][c]:
-        return True
-    else:
-        return False
     '''Devuelve True si hay un objetivo en la columna y fila (c, f).'''
-
+    return '.'==grilla[f][c] or '+'==grilla[f][c] or '*'==grilla[f][c]
 def hay_caja(grilla, c, f):
-    if '$'==grilla[f][c]:
-        return True
-    elif '*'==grilla[f][c]:
-        return True
-    else:
-        return False
     '''Devuelve True si hay una caja en la columna y fila (c, f).'''
-
+    return '$'==grilla[f][c] or '*'==grilla[f][c]
 def hay_jugador(grilla, c, f):
-    if '@' in grilla[f][c]:
-        return True
-    elif '+' in grilla[f][c]:
-        return True
     '''Devuelve True si el jugador está en la columna y fila (c, f).'''
+    return'@'==grilla[f][c] or '+'==grilla[f][c]
 
 def juego_ganado(grilla):
+    '''Devuelve True si el juego está ganado.'''
     objetivos=0
-    objetivos_con_caja=0
-    objetivos_con_jugador=0
     dimen=dimensiones(grilla)
     for y in range(dimen[1]):
         for x in range(dimen[0]):
-            if "."==(grilla[y][x]):
+            if grilla[y][x]=="." or grilla[y][x]=="+":
                 objetivos+=1
-            elif "+"==(grilla[y][x]):
-                objetivos_con_jugador+=1
-            elif "*"==(grilla[y][x]):
-                objetivos_con_caja+=1
-    if objetivos==objetivos_con_jugador==0 and objetivos_con_caja>0:
-        return True
-    else:
-        return False
-    '''Devuelve True si el juego está ganado.'''
+    return objetivos==0
 def mover(grilla,direccion):
-    place=direccionar(grilla,direccion)
-    if (grilla[place[0]][place[1]])!="#":
-        caracter=(grilla[place[0]][place[1]])
-        if (grilla[place[2]][place[3]])!=("#" and "$" and "*"):
-            if (grilla[place[2]][place[3]])=="$" and (grilla[place[0]][place[1]])=="$":
-                return crear_grilla(grilla)
-            elif (grilla[place[2]][place[3]])=="#" and (grilla[place[0]][place[1]])=="*":
-                return crear_grilla(grilla)
-            elif(grilla[place[2]][place[3]])=="." and (grilla[place[0]][place[1]])=="*":
-                new=crear_grilla(grilla)
-                (new[place[0]][place[1]])="+"
-                (new[place[2]][place[3]])="*"
-                return new
-            elif (grilla[place[2]][place[3]])=="#" and (grilla[place[0]][place[1]])=="$":
-                return crear_grilla(grilla)
-            elif (grilla[place[2]][place[3]])=="$" and (grilla[place[0]][place[1]])=="*":
-                return crear_grilla(grilla)
-            elif (grilla[place[0]][place[1]])==" " and (grilla[place[4]][place[5]])=="+":
-                new=crear_grilla(grilla)
-                (new[place[4]][place[5]])="."
-                (new[place[0]][place[1]])="@"
-                return new
-            elif caracter=="$" and (grilla[place[2]][place[3]])==".":
-                new=crear_grilla(grilla)
-                (new[place[2]][place[3]])="*"
-                (new[place[0]][place[1]])="@"
-                (new[place[4]][place[5]])=" "
-                return new
-            elif caracter=="$" and (grilla[place[2]][place[3]])==" ":
-                new=crear_grilla(grilla)
-                (new[place[2]][place[3]])="$"
-                (new[place[0]][place[1]])="@"
-                (new[place[4]][place[5]])=" "
-                return new
-            elif caracter==".":
-                new=crear_grilla(grilla)
-                (new[place[0]][place[1]])="+"
-                (new[place[4]][place[5]])=" "
-                return new
-            else:
-                new=crear_grilla(grilla)
-                (new[place[0]][place[1]])="@"
-                (new[place[4]][place[5]])=" "
-                return new
-        else:
-            return crear_grilla(grilla)
-    else:
-        return crear_grilla(grilla)
+    '''Mueve el jugador en la dirección indicada.
+
+    La dirección es una tupla con el movimiento horizontal y vertical. Dado que
+    no se permite el movimiento diagonal, la dirección puede ser una de cuatro
+    posibilidades:
+
+    direccion  significado
+    ---------  -----------
+    (-1, 0)    Oeste
+    (1, 0)     Este
+    (0, -1)    Norte
+    (0, 1)     Sur
+
+    La función debe devolver una grilla representando el estado siguiente al
+    movimiento efectuado. La grilla recibida NO se modifica; es decir, en caso
+    de que el movimiento sea válido, la función devuelve una nueva grilla.
+
+    Nota aparte: Hay una variable llamada posicionamiento la cual es una tupla
+    de forma (0,1,2,3,4,5); cada una de estos valores representa:
+       °0-1:La posicion en la que se desea mover el jugador
+       °2-3:La posicion que le sigue, se usara en la funcion "mover_con_caja"
+        para saber si se la puede mover
+       °4-5:La posicion en la que se encuentra el jugador
+    '''
+    copia_grilla=crear_grilla(grilla)
+    posicionamiento=direccionar(grilla,direccion)
+
+    if hay_pared(grilla,posicionamiento[1],posicionamiento[0])==False:
+        caracter=(grilla[posicionamiento[0]][posicionamiento[1]])
+
+        if hay_caja(grilla,posicionamiento[1],posicionamiento[0])==True:
+            return mover_con_caja(copia_grilla,grilla,caracter,direccion)
+
+        if grilla[posicionamiento[4]][posicionamiento[5]]=="+" or hay_objetivo(grilla,posicionamiento[1],posicionamiento[0])==True:
+            return mover_con_objetivo(copia_grilla,grilla,caracter,direccion)
+            
+        copia_grilla[posicionamiento[0]][posicionamiento[1]]="@"
+        copia_grilla[posicionamiento[4]][posicionamiento[5]]=" "
+
+    return copia_grilla
 
 def posicion_jugador(grilla):
     """Determinar columna y fila en donde esta el jugador"""
     dimen=dimensiones(grilla)
     for valor_x in range(dimen[1]):
         for valor_y in range(dimen[0]):
-            if "@"==grilla[valor_x][valor_y] or "+"==grilla[valor_x][valor_y]:
+            if hay_jugador(grilla,valor_y,valor_x)==True:
                 return (valor_y,valor_x)
+
 def direccionar(grilla,direccion):
-    x=direccion[0]
-    y=direccion[1]
+    """Saber posicion del jugador, casilla donde vas a moverte
+    y la casilla siguiente (para saber si podes mover la caja)"""
+
+    x_posicion=direccion[0]
+    y_posicion=direccion[1]
     pla=posicion_jugador(grilla)
-    x1=pla[1]+y
-    y1=pla[0]+x
-    x2=pla[1]+y*2
-    y2=pla[0]+x*2
-    z2=pla[0]
-    z1=pla[1]
-    return x1,y1,x2,y2,z1,z2
+
+    x_movimiento=pla[1]+y_posicion
+    y_movimiento=pla[0]+x_posicion
+    x_movimiento_doble=pla[1]+y_posicion*2
+    y_movimiento_doble=pla[0]+x_posicion*2
+    x_jugador=pla[1]
+    y_jugador=pla[0]
+
+    return x_movimiento,y_movimiento,x_movimiento_doble,y_movimiento_doble,x_jugador,y_jugador
+
+def mover_con_caja(copia_grilla,grilla,caracter,direccion):
+    """Mover cuando en la direccion hay una caja o caja con objetivo"""
+    posicionamiento=direccionar(grilla,direccion)
+
+    if grilla[posicionamiento[2]][posicionamiento[3]]==" ":
+
+        if grilla[posicionamiento[4]][posicionamiento[5]]=="+": 
+            copia_grilla[posicionamiento[4]][posicionamiento[5]]="."
+        else:
+            copia_grilla[posicionamiento[4]][posicionamiento[5]]=" "
+
+        if caracter=="*":                   
+            copia_grilla[posicionamiento[0]][posicionamiento[1]]="+"
+        else:
+            copia_grilla[posicionamiento[0]][posicionamiento[1]]="@"
+
+        copia_grilla[posicionamiento[2]][posicionamiento[3]]="$"
+
+
+    elif grilla[posicionamiento[2]][posicionamiento[3]]==".":
+
+        if grilla[posicionamiento[4]][posicionamiento[5]]=="@":
+            copia_grilla[posicionamiento[4]][posicionamiento[5]]=""
+        else:
+            copia_grilla[posicionamiento[4]][posicionamiento[5]]="."
+
+        if caracter=="$":
+            copia_grilla[posicionamiento[0]][posicionamiento[1]]="@"
+        else:
+            copia_grilla[posicionamiento[0]][posicionamiento[1]]="+"
+
+        copia_grilla[posicionamiento[2]][posicionamiento[3]]="*"
+    return copia_grilla
+
+def mover_con_objetivo(copia_grilla,grilla,caracter,direccion):
+    """Mover cuando hay un objetivo en la direccion o el jugador esta en uno"""
+    posicionamiento=direccionar(grilla,direccion)
+
+    if grilla[posicionamiento[4]][posicionamiento[5]]=="+":
+        copia_grilla[posicionamiento[4]][posicionamiento[5]]="."
+    else:
+        copia_grilla[posicionamiento[4]][posicionamiento[5]]=" "
+
+    if caracter==".":
+        copia_grilla[posicionamiento[0]][posicionamiento[1]]="+"
+    else:
+        copia_grilla[posicionamiento[0]][posicionamiento[1]]="@"
+
+    return copia_grilla
